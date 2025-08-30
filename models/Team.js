@@ -22,7 +22,7 @@ const Team = sequelize.define('Team', {
     },
     is_junior: { type: DataTypes.BOOLEAN, allowNull: false },
     score: { type: DataTypes.INTEGER, defaultValue: 0 },
-     first_solve_time: {
+     submission_time: {
         type: DataTypes.DATE,
         allowNull: true,
     },
