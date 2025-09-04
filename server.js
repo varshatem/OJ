@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const sequelize = require("./config/database");
 const { syncDB } = require('./models');
 const adminRoutes = require('./routes/adminRoutes');
+const userRoutes = require('./routes/userRoutes');
 // Routes
 // const leaderboardRoutes = require("./routes/leaderboard");
 // const submissionRoutes = require("./routes/submission");
@@ -50,6 +51,7 @@ app.get("/", (req, res) => {
   res.send("🚀 Online Judge API is running...");
 });
 app.use("/admin", adminRoutes);
+app.use("/user", userRoutes);
 // app.use("/leaderboard", leaderboardRoutes);
 // app.use("/submissions", submissionRoutes);
 

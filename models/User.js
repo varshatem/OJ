@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 6b046c1b60e6ffe97d067aa13e9f12918ac33acf
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');

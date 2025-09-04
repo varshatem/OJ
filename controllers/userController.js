@@ -183,7 +183,7 @@ exports.Login = async (req, res) => {
 
         let user;
 
-        // if (team_login) {
+        if (team_login) {
             if (!team_name) {
                 return res.status(400).json({ error: "Team login requires 'team_name' to be provided" });
             }
@@ -197,7 +197,19 @@ exports.Login = async (req, res) => {
             if (!user) {
                 return res.status(404).json({ error: "User not found in this team" });
             }
-       
+        } else {
+            user = await User.findOne({ where: { username, event_id } });
+
+            if (!user) {
+                return res.status(404).json({ error: "User not found. Please register first" });
+            }
+
+            const checkTeam = await Team.findByPk(user.team_id);
+
+            if (checkTeam && checkTeam.user2_id) {
+                return res.status(400).json({ error: "User is already part of a team. Please login as a team" });
+            }
+        }
 
         const validPassword = await bcrypt.compare(password, user.password);
 
@@ -255,6 +267,3 @@ exports.Login = async (req, res) => {
         res.status(500).json({ error: "Error logging in", details: error.message });
     }
 };
-
-
-
