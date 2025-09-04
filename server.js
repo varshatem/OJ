@@ -1,10 +1,8 @@
-// server.js
+
 require("dotenv").config();
 const express = require("express");
 const http = require('http');
-// ...existing code...
-//const bodyParser = require("body-parser");
-//const cors = require("cors");
+
 require('dotenv').config();
 // Database
 const cookieParser = require('cookie-parser');
@@ -12,9 +10,6 @@ const sequelize = require("./config/database");
 const { syncDB } = require('./models');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
-// Routes
-// const leaderboardRoutes = require("./routes/leaderboard");
-// const submissionRoutes = require("./routes/submission");
 
 const app = express();
 app.use(express.json());  // To handle JSON payloads
@@ -38,11 +33,7 @@ const corsOptions = {
 const server = http.createServer(app);
 
 app.use(cors(corsOptions));
-//app.use('/admin', adminRoutes);
-// Middleware
-//app.use(cors());
-//app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded({ extended: true }));
+
 (async () => {
     await syncDB();
 })();
@@ -52,11 +43,7 @@ app.get("/", (req, res) => {
 });
 app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
-// app.use("/leaderboard", leaderboardRoutes);
-// app.use("/submissions", submissionRoutes);
 
-// Sync DB & Start server
-//app.use(cookieParser())
 const PORT = process.env.PORT || 3000;
 
 sequelize.sync()
@@ -69,3 +56,4 @@ sequelize.sync()
   .catch((err) => {
     console.error("❌ Failed to connect DB:", err);
   });
+
