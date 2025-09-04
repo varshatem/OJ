@@ -267,3 +267,40 @@ exports.Login = async (req, res) => {
         res.status(500).json({ error: "Error logging in", details: error.message });
     }
 };
+exports.GetProfile = async(req,res)=>{
+    try{
+        const user = await User.findByPk(req.user.id,{attributes:{exclude:['password']}});
+    }catch(error){
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ error: "Error fetching user profile", details: error.message });
+    }
+};
+
+exports.Logout = async (req,res)=>{
+    try{
+        res.clearCookie("tokes");
+        res.status(200).json({message:"User logged out successfully"});
+    }
+    catch(error){
+        console.error("Error logging out:", error);
+        res.status(500).json({ error: "Error logging out", details: error.message });
+    }
+};
+
+
+exports.getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.findAll();
+        const now = new Date();
+        
+        for (const event of events) {
+            if (event.end_time && now > event.end_time) {
+                event.is_active = false;
+                await event.save();
+            }
+        }
+        res.status(200).json({ events });
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching events', details: error.message });
+    }
+};
