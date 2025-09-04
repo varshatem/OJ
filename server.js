@@ -56,3 +56,4 @@ sequelize.sync()
   .catch((err) => {
     console.error("❌ Failed to connect DB:", err);
   });
+

@@ -17,4 +17,6 @@ router.get("/teams", adminAuth, adminController.getAllTeams);
 
 router.post("/create-event", adminAuth, adminController.createEvent);
 
+router.get("/problems", adminAuth, adminController.getAllProblems);
 module.exports = router;
+
