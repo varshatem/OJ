@@ -10,7 +10,7 @@ const sequelize = require("./config/database");
 const { syncDB } = require('./models');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
-
+const problemroutes = require('./routes/problemroutes');
 const app = express();
 app.use(express.json());  // To handle JSON payloads
 app.use(cookieParser())
@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 });
 app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
-
+app.use("/problems", problemroutes);
 const PORT = process.env.PORT || 3000;
 
 sequelize.sync()
