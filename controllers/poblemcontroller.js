@@ -8,14 +8,14 @@ exports.createProblem = async (req, res) => {
 
     // create problem first
     const problem = await Problem.create({  title, description,score,input_format,output_format,consraints,is_junior,time_limit,memory_limit,event_id, });
-    const missingFields = problem.filter(field => !(field in req.body));
+    // const missingFields = problem.filter(field => !(field in req.body));
 
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        error: "Missing required fields",
-        missing: missingFields
-      });
-    }
+    // if (missingFields.length > 0) {
+    //   return res.status(400).json({
+    //     error: "Missing required fields",
+    //     missing: missingFields
+    //   });
+    // }
 
     // if samples are provided, bulk insert them
     if (samples && Array.isArray(samples)) {
@@ -31,14 +31,19 @@ exports.createProblem = async (req, res) => {
     return res.status(201).json({ message: "Problem created", problem });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Failed to create problem" });
+    return res.status(500).json({ error: "Failed to create problem"
+        , details: err.message
+     });
   }
 };
 
 // Get all problems with their samples
 exports.getAllProblems = async (req, res) => {
+     
   try {
+    const { event_id, is_junior } = req.user;
     const problems = await Problem.findAll({
+        where: { event_id, is_junior },
       include: [{ model: ProblemSample, as: "samples" }]
     });
     return res.json(problems);
