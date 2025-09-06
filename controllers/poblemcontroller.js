@@ -75,15 +75,15 @@ exports.addSample = async (req, res) => {
   try {
     const { id } = req.params; // problem ID
     const { input, output, explanation } = req.body;
-    const data = req.body();
-const missingFields = data.filter(field => !(field in req.body));
+//     const data = req.body();
+// const missingFields = data.filter(field => !(field in req.body));
 
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        error: "Missing required fields",
-        missing: missingFields
-      });
-    }
+//     if (missingFields.length > 0) {
+//       return res.status(400).json({
+//         error: "Missing required fields",
+//         missing: missingFields
+//       });
+//     }
 
     const problem = await Problem.findByPk(id);
     if (!problem) return res.status(404).json({ error: "Problem not found" });
