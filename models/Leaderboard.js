@@ -1,65 +1,56 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+// models/Leaderboard.js
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
-const Leaderboard = sequelize.define('Leaderboard', {
-    id: { 
-        type: DataTypes.INTEGER, 
-        autoIncrement: true, 
-        primaryKey: true 
-    },
+const Leaderboard = sequelize.define("Leaderboard", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
 
-    event_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'events',
-            key: 'id'
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE"
-    },
+  event_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: "events", key: "id" },
+    onDelete: "CASCADE",
+  },
 
-    team_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'teams',
-            key: 'id'
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE"
-    },
+  team_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: "teams", key: "id" },
+    onDelete: "CASCADE",
+  },
 
-    score: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-    },
+  // Array of objects: [{ problem_id, score, accepted_time }]
+  problems: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
 
-    last_submission_time: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
+  total_score: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
 
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
-    },
+  total_solved: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
 
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
-    }
+  last_submission_time: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
-    timestamps: false,
-    indexes: [
-        {
-            unique: true,
-            fields: ['event_id', 'team_id']
-        }
-    ]
+  indexes: [
+    {
+      unique: true,
+      fields: ["event_id", "team_id"], // ensures unique team per event
+    },
+  ],
+  timestamps: true, // adds createdAt & updatedAt
 });
 
 module.exports = Leaderboard;

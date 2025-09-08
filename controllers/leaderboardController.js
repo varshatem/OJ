@@ -1,70 +1,93 @@
-const { Team, User, Submission, Problem } = require('../models');
 
-const getTeamLeaderboard = async (req, res) => {
+const { Leaderboard, Team, Problem } = require("../models");
+
+/**
+ * Update leaderboard when a submission is accepted
+ * - Add/update problem entry
+ * - Recalculate total_score, total_solved
+ * - Update last_submission_time
+ */
+exports.updateLeaderboard = async (req, res) => {
   try {
-    // Get all teams
-    const teams = await Team.findAll({
-      include: [
-        { model: User, as: 'Users', attributes: ['id', 'username'] },
-        {
-          model: Submission,
-          as: 'Submissions',
-          include: [{ model: Problem, as: 'Problem', attributes: ['id', 'score'] }]
-        }
-      ]
-    });
+    const { team_id, event_id, problem_id, verdict, submitted_at } = req.body;
 
-    let leaderboard = teams.map(team => {
-      // filter only accepted submissions
-      const acceptedSubs = team.Submissions.filter(s => s.verdict === 'Accepted');
+    if (verdict !== "Accepted") {
+      return res.status(200).json({ message: "No update (submission not accepted)" });
+    }
 
-      // map problem_id → earliest accepted submission
-      const uniqueProblems = new Map();
-      acceptedSubs.forEach(sub => {
-        if (!uniqueProblems.has(sub.problem_id)) {
-          uniqueProblems.set(sub.problem_id, sub);
-        } else {
-          // keep earliest submission
-          if (new Date(sub.submitted_at) < new Date(uniqueProblems.get(sub.problem_id).submitted_at)) {
-            uniqueProblems.set(sub.problem_id, sub);
-          }
-        }
+    // Get problem score
+    const problem = await Problem.findByPk(problem_id);
+    if (!problem) {
+      return res.status(404).json({ message: "Problem not found" });
+    }
+
+    // Find or create leaderboard entry
+    let leaderboard = await Leaderboard.findOne({ where: { team_id, event_id } });
+    if (!leaderboard) {
+      leaderboard = await Leaderboard.create({
+        team_id,
+        event_id,
+        problems: [],
+        total_score: 0,
+        total_solved: 0,
+      });
+    }
+
+    let problems = leaderboard.problems || [];
+
+    // Check if problem already solved
+    const existing = problems.find((p) => p.problem_id === problem_id);
+
+    if (!existing) {
+      // Add new solved problem
+      problems.push({
+        problem_id,
+        score: problem.score,
+        accepted_time: submitted_at || new Date(),
       });
 
-      // calculate total score
-      const score = Array.from(uniqueProblems.values())
-        .reduce((acc, sub) => acc + (sub.Problem?.score || 0), 0);
+      leaderboard.total_score += problem.score;
+      leaderboard.total_solved += 1;
 
-      // latest submission time (used for tie-breaking)
-      let lastSubmissionTime = null;
-      if (uniqueProblems.size > 0) {
-        lastSubmissionTime = new Date(Math.max(...Array.from(uniqueProblems.values())
-          .map(sub => new Date(sub.submitted_at).getTime())));
-      }
+      // Update last submission time (latest accepted)
+      leaderboard.last_submission_time = submitted_at || new Date();
 
-      return {
-        teamId: team.id,
-        teamName: team.team_name,
-        members: team.Users.map(u => u.username),
-        score,
-        lastSubmissionTime
-      };
-    });
+      leaderboard.problems = problems;
+      await leaderboard.save();
+    }
 
-    // sort leaderboard → score desc, then submission time asc
-    leaderboard.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (a.lastSubmissionTime && b.lastSubmissionTime) {
-        return new Date(a.lastSubmissionTime) - new Date(b.lastSubmissionTime);
-      }
-      return 0;
-    });
-
-    res.json({ leaderboard });
+    return res.status(200).json({ message: "Leaderboard updated", leaderboard });
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
-    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+    console.error("Error updating leaderboard:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-module.exports = { getTeamLeaderboard };
+/**
+ * Get leaderboard for an event
+ * - Sorted by total_score (desc), then last_submission_time (asc)
+ */
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const { event_id } = req.params;
+
+    const leaderboard = await Leaderboard.findAll({
+      where: { event_id },
+      order: [
+        ["total_score", "DESC"],
+        ["last_submission_time", "ASC"], // tie-breaker
+      ],
+      include: [
+        {
+          model: Team,
+          attributes: ["id", "team_name"],
+        },
+      ],
+    });
+
+    return res.status(200).json(leaderboard);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
