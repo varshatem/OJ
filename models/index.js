@@ -5,7 +5,11 @@ const Problem = require('./Problem');
 const Submission = require('./Submission');
 const ProblemSample = require('./ProblemSample');
 const Event = require('./Event');
+<<<<<<< HEAD
 const leaderboard = require('./Leaderboard');
+=======
+const Leaderboard = require('./Leaderboard');
+>>>>>>> 87d6dbb9dd9ac9a1e722d89c9019c892236ebade
 // **Define Relationships AFTER loading models**
 User.belongsTo(Team, { foreignKey: 'team_id', as: 'Team' });
 Team.hasMany(User, { foreignKey: 'team_id', as: 'Users' });
@@ -36,9 +40,14 @@ leaderboard.belongsTo(Team, { foreignKey: 'team_id', as: 'Team' });
 Team.hasOne(leaderboard, { foreignKey: 'team_id', as: 'Leaderboard' });
 
 // Leaderboard ↔ Event
+<<<<<<< HEAD
 leaderboard.belongsTo(Event, { foreignKey: 'event_id', as: 'Event' });
 Event.hasOne(leaderboard, { foreignKey: 'event_id', as: 'Leaderboards' });
 
+=======
+Leaderboard.belongsTo(Event, { foreignKey: 'event_id', as: 'Event' });
+Event.hasOne(Leaderboard, { foreignKey: 'event_id', as: 'Leaderboards' });
+>>>>>>> 87d6dbb9dd9ac9a1e722d89c9019c892236ebade
 
 const syncDB = async () => {
     try {
