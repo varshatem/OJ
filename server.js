@@ -6,9 +6,9 @@ const { initSocket } = require('./SocketConnection');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const problemroutes = require('./routes/problemroutes');
-const submissionroutes = require('./routes/submissionRoutes');
-const webhookroutes = require('./routes/WebhookRoutes');
-
+const resultRoutes = require('./routes/resultRoutes');
+const leaderboardRoutes = require('./routes/leaderboardroutes');
+const submissionRoutes = require('./routes/submissionRoutes');
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -27,17 +27,18 @@ app.get("/", (req, res) => res.send("🚀 Online Judge API is running..."));
 app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
 app.use("/problems", problemroutes);
-app.use("/submissions", submissionroutes);
-app.use("/webhook",webhookroutes);
+app.use("/results", resultRoutes);
+app.use("/leaderboard", leaderboardRoutes);
+app.use("/submission",submissionRoutes);
+const PORT = process.env.PORT || 3000;
 
-initSocket(server, {
+initSocket(server,{
     cors: {
-        origin: "*",
-        credentials: false
+        origin: allowedOrigins,
+        credentials: true,
     }
 });
 
-const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
