@@ -12,7 +12,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const problemroutes = require('./routes/problemroutes');
 const resultRoutes = require('./routes/resultRoutes');
-const LeaderboardRoutes = require('./routes/leaderboardroutes');
+const leaderboardRoutes = require('./routes/leaderboardroutes');
 const app = express();
 app.use(express.json());  // To handle JSON payloads
 app.use(cookieParser())
@@ -47,7 +47,7 @@ app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
 app.use("/problems", problemroutes);
 app.use("/results", resultRoutes);
-app.use("/leaderboard", LeaderboardRoutes);
+app.use("/leaderboard", leaderboardRoutes);
 const PORT = process.env.PORT || 3000;
 
 sequelize.sync()
