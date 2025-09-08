@@ -31,6 +31,15 @@ Event.hasMany(Problem, { foreignKey: 'event_id', as: 'Problems' });
 Submission.belongsTo(Event, { foreignKey: 'event_id', as: 'Event' });
 Event.hasMany(Submission, { foreignKey: 'event_id', as: 'Submissions' });
 
+// Leaderboard ↔ Team
+Leaderboard.belongsTo(Team, { foreignKey: 'team_id', as: 'Team' });
+Team.hasOne(Leaderboard, { foreignKey: 'team_id', as: 'Leaderboard' });
+
+// Leaderboard ↔ Event
+Leaderboard.belongsTo(Event, { foreignKey: 'event_id', as: 'Event' });
+Event.hasMany(Leaderboard, { foreignKey: 'event_id', as: 'Leaderboards' });
+
+
 const syncDB = async () => {
     try {
         await sequelize.sync({ alter: true });
