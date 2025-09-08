@@ -1,7 +1,7 @@
 
 const express = require("express");
 const router = express.Router();
-const problemcontroller = require("../controllers/problemcontroller");
+const problemcontroller = require("../controllers/poblemcontroller");
 const adminAuthenticate= require("../middlewares/authMiddleware");
 const authenticateToken = require("../middlewares/authMiddleware");
 // Create a new problem
