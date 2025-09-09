@@ -37,7 +37,7 @@ Team.hasOne(Leaderboard, { foreignKey: 'team_id', as: 'Leaderboard' });
 
 // Leaderboard ↔ Event
 Leaderboard.belongsTo(Event, { foreignKey: 'event_id', as: 'Event' });
-Event.hasOne(Leaderboard, { foreignKey: 'event_id', as: 'Leaderboards' });
+Event.hasMany(Leaderboard, { foreignKey: 'event_id', as: 'Leaderboards' });
 
 const syncDB = async () => {
     try {
