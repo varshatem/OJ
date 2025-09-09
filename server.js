@@ -1,18 +1,18 @@
-
-require("dotenv").config();
 const express = require("express");
-const http = require('http');
-
-require('dotenv').config();
-// Database
-const cookieParser = require('cookie-parser');
+require("dotenv").config();
+const http = require("http");
+const cors = require("cors");
 const sequelize = require("./config/database");
 const { syncDB } = require('./models');
+const cookieParser = require('cookie-parser');
+const { initSocket } = require('./SocketConnection');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const problemroutes = require('./routes/problemroutes');
-//const resultRoutes = require('./routes/resultRoutes');
-const LeaderboardRoutes = require('./routes/leaderboardroutes');
+const resultRoutes = require('./routes/resultRoutes');
+const leaderboardRoutes = require('./routes/leaderboardroutes');
+const submissionRoutes = require('./routes/submissionRoutes');
+const webhookRoutes = require('./routes/WebhookRoutes');
 const app = express();
 app.use(express.json());  // To handle JSON payloads
 app.use(cookieParser())
@@ -24,35 +24,46 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 ? process.env.ALLOWED_ORIGINS.split(',') 
 : ["http://localhost:5173", "http://localhost:3000"];
 
-const corsOptions = {
-    origin: allowedOrigins,
-    credentials: true, // Allow credentials (cookies)
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['set-cookie']
-};
+// Allow all origins
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 const server = http.createServer(app);
-
-app.use(cors(corsOptions));
-
 (async () => {
     await syncDB();
 })();
 // Routes
-app.get("/", (req, res) => {
-  res.send("🚀 Online Judge API is running...");
-});
+app.get("/", (req, res) => res.send("🚀 Online Judge API is running..."));
 app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
 app.use("/problems", problemroutes);
-//app.use("/results", resultRoutes);
-app.use("/leaderboard", LeaderboardRoutes);
+app.use("/results", resultRoutes);
+app.use("/leaderboard", leaderboardRoutes);
+app.use("/submission",submissionRoutes);
+app.use("/webhook",webhookRoutes);
 const PORT = process.env.PORT || 3000;
+
+initSocket(server,{
+    cors: {
+        origin: "*",
+        credentials: true,
+    }
+});
 
 sequelize.sync()
   .then(() => {
     console.log("✅ Database connected & synced");
+
+    initSocket(server, {
+      cors: {
+        origin: "*",
+        credentials: true,
+      },
+    });
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
@@ -60,4 +71,3 @@ sequelize.sync()
   .catch((err) => {
     console.error("❌ Failed to connect DB:", err);
   });
-
