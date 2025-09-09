@@ -1,6 +1,6 @@
-exports.RunProblem = async (req, res) => {
 const axios = require('axios');  
 const CELERY_API_BASE = 'http://localhost:5000';//enter ur flask route
+
 
 async function enqueueTask(queue, data) {
     try {
@@ -20,7 +20,8 @@ async function enqueueTask(queue, data) {
         console.error(`Error enqueueing via Flask API:`, error.message);
     }
 }
-    
+
+exports.RunProblem = async (req, res) => {
 try {
 
         const { problem_id, code, customTestcase, language } = req.body;
@@ -46,3 +47,34 @@ try {
         res.status(500).json({ error: 'Failed to enqueue run request.' });
     }   
 }
+
+exports.RunOnSystem = async (req, res) => {
+  try {
+    const { problem_id, customTestcase } = req.body;
+    const { problem, event } = req;
+
+    const submission_id = `run_${Date.now()}`;
+
+    const runData = {
+      submission_id,
+      problem_id,
+      customTestcase: customTestcase || null,
+    };
+
+    await enqueueTask("runSystemQueue", runData);
+
+    return res.status(200).json({
+      message: "Run request has been successfully enqueued.",
+      submission_id,
+    });
+  } catch (error) {
+    console.error("Error enqueuing run request:", error);
+    return res
+      .status(500)
+      .json({ error: "Unable to enqueue run request. Please try again." });
+  }
+};
+
+
+
+
